@@ -98,13 +98,14 @@ Environment discovery:
 Smoke command:
 
 ```bash
-PYTHONPATH=. xvfb-run -a python3 /tmp/minicalc_pr5_tk_smoke.py
+PYTHONPATH=. xvfb-run -a python3 scripts/minicalc_pr5_tk_smoke.py
 ```
 
 Result:
 
 - `PASS: Tkinter UI instantiated and PR-05 smoke checklist exercised under Xvfb`.
 - Evidence file: `docs/pr5/TKINTER_SMOKE_EVIDENCE.md`.
+- Tracked smoke script: `scripts/minicalc_pr5_tk_smoke.py`.
 
 Remaining before final merge recommendation:
 
@@ -148,3 +149,24 @@ Result:
 - `py_compile` clean.
 - `git diff --check` clean.
 - Tkinter Xvfb smoke `PASS`.
+
+## 2026-05-15 — Final 3AI re-review after warning fixes
+
+Re-review package:
+
+- `C:\Users\chien\_3AI_WorkSpace\code_reviews\minicalc_pr5_final_rereview_20260515_152401`
+
+Verdicts:
+
+- Gemini: `PASS`; final branch release-ready.
+- Codex: `PASS_WITH_WARNINGS`; no blockers. Only warning was stale status text in `docs/pr5/ACCEPTANCE_CRITERIA.md`.
+- Claude: `PASS`; all prior warnings closed except documented non-blocking notes.
+
+Follow-up after Codex re-review:
+
+- Updated `docs/pr5/ACCEPTANCE_CRITERIA.md` status line from pending to complete-local / merge-pending-Scott.
+
+Final state before Scott approval:
+
+- PR-04 caveats are closed by cumulative PR-05 review + Xvfb Tkinter smoke evidence.
+- No merge to `main` has been performed.

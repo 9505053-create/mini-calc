@@ -1,6 +1,6 @@
 # MiniCalc PR-05 Acceptance Criteria
 
-Status: Implementation complete locally; final review and smoke evidence pending.
+Status: Complete locally; final 3AI reviews and Xvfb Tkinter smoke are recorded. Merge remains pending Scott approval.
 
 ## Functional Criteria
 
