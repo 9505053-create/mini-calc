@@ -2,7 +2,7 @@
 
 Date: 2026-05-15
 Branch: `pr5-final-release`
-Head at smoke time: `971d93b feat: record standard chaining history`
+Head at smoke time: final PR-05 branch tip after review-warning fixes
 
 ## Environment
 
@@ -17,7 +17,7 @@ TclError: no display name and no $DISPLAY environment variable
 ## Command
 
 ```bash
-PYTHONPATH=. xvfb-run -a python3 /tmp/minicalc_pr5_tk_smoke.py
+PYTHONPATH=. xvfb-run -a python3 scripts/minicalc_pr5_tk_smoke.py
 ```
 
 ## Result
@@ -40,4 +40,4 @@ PASS: Tkinter UI instantiated and PR-05 smoke checklist exercised under Xvfb
 
 ## Caveat
 
-This is a real Tkinter GUI smoke under Xvfb, not a human-observed visible Windows desktop screenshot. It closes the local environment's executable GUI smoke gate; a human visible smoke can still be repeated on Scott's Windows desktop before merging if desired.
+This is a real Tkinter GUI smoke under Xvfb, not a human-observed visible Windows desktop screenshot. The smoke script is tracked at `scripts/minicalc_pr5_tk_smoke.py` so reviewers can audit and rerun it. It closes the local environment's executable GUI smoke gate; a human visible smoke can still be repeated on Scott's Windows desktop before merging if desired.

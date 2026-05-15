@@ -17,5 +17,5 @@ Status: Implementation complete locally; final review and smoke evidence pending
 - [x] TDD RED/GREEN evidence recorded in development history.
 - [x] Full automated gate passes locally.
 - [x] Tkinter smoke evidence recorded via Xvfb in `docs/pr5/TKINTER_SMOKE_EVIDENCE.md`.
-- [ ] Final 3AI implementation review completed or any unavailable reviewer explicitly documented.
-- [ ] No merge to `main` without Scott approval.
+- [x] Final 3AI implementation review completed: Gemini `PASS`, Codex `PASS_WITH_WARNINGS`, Claude `PASS_WITH_WARNINGS`; no blockers.
+- [x] No merge to `main` without Scott approval.

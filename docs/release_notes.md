@@ -17,11 +17,12 @@ PR-05 closes the final release-hardening loop by adding the deferred Standard Mo
 
 - Added controller tests for chaining history, operator replacement no-history, keyboard operator chaining, and controlled chaining error history.
 - Added fake-widget UI coverage for Standard chaining history panel updates.
+- Added a regression test so chained history operands use the same display-rounded text users saw, e.g. `3.33333333 + 1` instead of raw high-precision Decimal internals.
 - Preserved the PR-04 `pop_history_entry()` seam and display-string controller contract.
 
 ### Verification
 
-- `python3 -m pytest -q` → 120 passed.
+- `python3 -m pytest -q` → 121 passed.
 - `python3 -m py_compile calculator.py source/*.py tests/*.py` → clean.
 - `git diff --check` → clean.
 

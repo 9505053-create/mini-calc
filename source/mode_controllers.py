@@ -110,12 +110,8 @@ class StandardModeController:
     def _display_operator(operator: str) -> str:
         return {"*": "×", "/": "÷"}.get(operator, operator)
 
-    @staticmethod
-    def _format_history_operand(value: Decimal) -> str:
-        text = format(value, "f")
-        if "." in text:
-            text = text.rstrip("0").rstrip(".")
-        return text or "0"
+    def _format_history_operand(self, value: Decimal) -> str:
+        return self.engine._format_decimal(value)
 
     def _handle_memory_button(self, label: str) -> str:
         display = self.engine.get_display()

@@ -146,6 +146,26 @@ def test_standard_controller_records_chaining_operator_history_entry():
     )
 
 
+def test_standard_controller_uses_display_formatted_operand_for_chaining_history():
+    controller = StandardModeController(CalculatorEngine(), MemoryStore())
+
+    controller.handle_button("1")
+    controller.handle_button("0")
+    controller.handle_button("÷")
+    controller.handle_button("3")
+    assert controller.handle_button("+") == "3.33333333"
+    assert controller.pop_history_entry() == HistoryEntry(
+        mode="Standard", expression="10 ÷ 3", result="3.33333333"
+    )
+
+    controller.handle_button("1")
+    assert controller.handle_button("+") == "4.33333333"
+
+    assert controller.pop_history_entry() == HistoryEntry(
+        mode="Standard", expression="3.33333333 + 1", result="4.33333333"
+    )
+
+
 def test_standard_controller_operator_replacement_does_not_record_history():
     controller = StandardModeController(CalculatorEngine(), MemoryStore())
 
