@@ -72,3 +72,20 @@ Decision after review synthesis:
 - Require Programmer same-base clicks to emit no history entry.
 - Require scrollable/toggleable history UI and fake-widget clear-history test.
 - Added `docs/pr4/PR4_SMOKE_CHECKLIST.md`.
+
+
+## 2026-05-15 — PR-04 Task 1 HistoryStore TDD
+
+RED:
+
+- Added `tests/test_history_store.py` for empty store, immutable entry snapshots, clear, max-entry trimming, formatting, and invalid max-entry rejection.
+- Verified RED: `python3 -m pytest tests/test_history_store.py -q` failed with `ModuleNotFoundError: No module named 'source.history_store'`.
+
+GREEN:
+
+- Added `source/history_store.py` with frozen `HistoryEntry` and bounded in-memory `HistoryStore`.
+- Verification:
+  - `python3 -m pytest tests/test_history_store.py -q` -> `7 passed`.
+  - `python3 -m pytest -q` -> `101 passed`.
+  - `python3 -m py_compile source/history_store.py tests/test_history_store.py` -> clean.
+  - `git diff --check` -> clean.
