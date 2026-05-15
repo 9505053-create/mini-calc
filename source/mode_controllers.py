@@ -204,17 +204,31 @@ class DateModeController:
     def __init__(self, date_calculator: DateCalculator | None = None) -> None:
         self.date_calculator = date_calculator or DateCalculator()
         self.workflow = "difference"
+        self._history_entry: HistoryEntry | None = None
 
     def enter(self, previous_display: str | None = None) -> str:
+        self._history_entry = None
         return "Date Mode"
 
+    def pop_history_entry(self) -> HistoryEntry | None:
+        entry = self._history_entry
+        self._history_entry = None
+        return entry
+
     def calculate_difference(self, start_date: str, end_date: str) -> str:
+        self._history_entry = None
         try:
             days = self.date_calculator.days_between(start_date, end_date)
         except ValueError:
             return "Invalid date"
         suffix = "day" if abs(days) == 1 else "days"
-        return f"{days} {suffix}"
+        result = f"{days} {suffix}"
+        self._history_entry = HistoryEntry(
+            mode=self.name,
+            expression=f"{start_date} → {end_date}",
+            result=result,
+        )
+        return result
 
     def calculate_duration(
         self,
@@ -226,8 +240,9 @@ class DateModeController:
         weeks: str = "0",
         days: str = "0",
     ) -> str:
+        self._history_entry = None
         try:
-            return self.date_calculator.add_duration(
+            result = self.date_calculator.add_duration(
                 base_date,
                 operation=operation,
                 years=years,
@@ -240,3 +255,20 @@ class DateModeController:
             if "invalid ISO date" in message:
                 return "Invalid date"
             return "Invalid duration"
+        symbol = "+" if operation == "add" else "-"
+        self._history_entry = HistoryEntry(
+            mode=self.name,
+            expression=f"{base_date} {symbol} {self._duration_text(years, months, weeks, days)}",
+            result=result,
+        )
+        return result
+
+    @staticmethod
+    def _duration_text(years: str, months: str, weeks: str, days: str) -> str:
+        parts = []
+        for label, raw in (("year", years), ("month", months), ("week", weeks), ("day", days)):
+            value = int(raw or "0")
+            if value:
+                suffix = label if abs(value) == 1 else f"{label}s"
+                parts.append(f"{value} {suffix}")
+        return ", ".join(parts) if parts else "0 days"

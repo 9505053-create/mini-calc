@@ -108,3 +108,23 @@ GREEN:
   - `python3 -m pytest -q` -> `105 passed`.
   - `python3 -m py_compile source/mode_controllers.py tests/test_mode_controllers.py` -> clean.
   - `git diff --check` -> clean.
+
+
+## 2026-05-15 — PR-04 Task 3 Date Mode history events
+
+RED:
+
+- Added Date controller tests for difference history, duration add/subtract history, and invalid input no-history behavior.
+- Verified RED: `test_date_controller_records_difference_history_entry` failed with `AttributeError: 'DateModeController' object has no attribute 'pop_history_entry'`.
+
+GREEN:
+
+- Added `pop_history_entry()` to `DateModeController`.
+- Successful date difference now emits `HistoryEntry(mode="Date", expression="start → end", result="N days")`.
+- Successful duration add/subtract now emits human-readable duration history.
+- Invalid date/duration inputs reset/leave no pending history entry.
+- Verification:
+  - `python3 -m pytest tests/test_mode_controllers.py -q` -> `23 passed`.
+  - `python3 -m pytest -q` -> `109 passed`.
+  - `python3 -m py_compile source/mode_controllers.py tests/test_mode_controllers.py` -> clean.
+  - `git diff --check` -> clean.

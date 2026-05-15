@@ -209,3 +209,49 @@ def test_date_controller_subtract_duration_returns_iso_date():
     assert controller.calculate_duration(
         "2024-03-31", operation="subtract", years="", months="1", weeks="", days=""
     ) == "2024-02-29"
+
+
+
+def test_date_controller_records_difference_history_entry():
+    controller = DateModeController()
+
+    assert controller.calculate_difference("2026-05-15", "2026-05-20") == "5 days"
+
+    assert controller.pop_history_entry() == HistoryEntry(
+        mode="Date", expression="2026-05-15 → 2026-05-20", result="5 days"
+    )
+
+
+def test_date_controller_records_duration_add_history_entry():
+    controller = DateModeController()
+
+    assert controller.calculate_duration(
+        "2026-01-31", operation="add", years="", months="1", weeks="", days=""
+    ) == "2026-02-28"
+
+    assert controller.pop_history_entry() == HistoryEntry(
+        mode="Date", expression="2026-01-31 + 1 month", result="2026-02-28"
+    )
+
+
+def test_date_controller_records_duration_subtract_history_entry():
+    controller = DateModeController()
+
+    assert controller.calculate_duration(
+        "2026-03-31", operation="subtract", years="", months="1", weeks="", days=""
+    ) == "2026-02-28"
+
+    assert controller.pop_history_entry() == HistoryEntry(
+        mode="Date", expression="2026-03-31 - 1 month", result="2026-02-28"
+    )
+
+
+def test_date_controller_invalid_inputs_do_not_record_history():
+    controller = DateModeController()
+
+    assert controller.calculate_difference("2026-02-30", "2026-03-01") == "Invalid date"
+    assert controller.pop_history_entry() is None
+    assert controller.calculate_duration(
+        "2026-05-15", operation="add", years="", months="", weeks="", days="abc"
+    ) == "Invalid duration"
+    assert controller.pop_history_entry() is None
