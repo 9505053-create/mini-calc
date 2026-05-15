@@ -88,7 +88,24 @@ Result:
 - `py_compile` clean.
 - `git diff --check` clean.
 
+## 2026-05-15 — Tkinter smoke evidence
+
+Environment discovery:
+
+- Direct Tkinter launch in WSL failed with `TclError: no display name and no $DISPLAY environment variable`.
+- `xvfb-run` is available.
+
+Smoke command:
+
+```bash
+PYTHONPATH=. xvfb-run -a python3 /tmp/minicalc_pr5_tk_smoke.py
+```
+
+Result:
+
+- `PASS: Tkinter UI instantiated and PR-05 smoke checklist exercised under Xvfb`.
+- Evidence file: `docs/pr5/TKINTER_SMOKE_EVIDENCE.md`.
+
 Remaining before final merge recommendation:
 
-- Tkinter smoke evidence.
 - Final cumulative 3AI implementation review.
