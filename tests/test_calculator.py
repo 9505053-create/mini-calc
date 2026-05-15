@@ -184,6 +184,38 @@ class TestBackspace:
         assert result == "Error"
 
 
+class TestReplaceCurrentInput:
+    """PR-03: Memory recall needs a public current-input replacement API."""
+
+    def test_replace_current_input_preserves_pending_operator_for_second_operand(self):
+        engine = CalculatorEngine()
+        engine.press_digit("5")
+        engine.press_operator("+")
+        assert engine.replace_current_input("12") == "12"
+        assert engine.press_equals() == "17"
+
+    def test_replace_current_input_replaces_active_second_operand(self):
+        engine = CalculatorEngine()
+        engine.press_digit("5")
+        engine.press_operator("+")
+        engine.press_digit("3")
+        assert engine.replace_current_input("12") == "12"
+        assert engine.press_equals() == "17"
+
+    def test_replace_current_input_after_result_starts_new_input(self):
+        engine = CalculatorEngine()
+        press_sequence(engine, ["2", "+", "3", "="])
+        assert engine.replace_current_input("12") == "12"
+        assert engine.press_operator("+") == "12"
+        assert engine.get_state() == CalculatorEngine.WAITING_SECOND
+
+    def test_replace_current_input_after_error_is_noop(self):
+        engine = CalculatorEngine()
+        press_sequence(engine, ["5", "/", "0", "="])
+        assert engine.replace_current_input("12") == "Error"
+        assert engine.get_state() == CalculatorEngine.ERROR
+
+
 class TestNegativeZero:
     """P2: Toggling sign on 0 should not show -0."""
 

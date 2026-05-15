@@ -174,6 +174,52 @@ py_compile clean
 git diff --check clean
 ```
 
+
+### 2026-05-15 12:35 — Phase 3.0 CalculatorEngine module boundary and Memory Recall API
+
+Refactor boundary:
+
+- Moved `CalculatorEngine` from root `calculator.py` to `source/calculator_engine.py`.
+- Kept `calculator.py` compatibility import: `from source.calculator_engine import CalculatorEngine`.
+- Verified existing PR-02.1 regression tests still pass after the move.
+
+TDD RED for `replace_current_input`:
+
+```bash
+python3 -m pytest tests/test_calculator.py::TestReplaceCurrentInput -q
+```
+
+Expected failure observed:
+
+```text
+AttributeError: 'CalculatorEngine' object has no attribute 'replace_current_input'
+```
+
+GREEN implementation:
+
+- Added `CalculatorEngine.replace_current_input(text: str) -> str`.
+- Covered pending second operand, active second operand, result state, and error no-op behavior.
+
+Verification:
+
+```bash
+python3 -m pytest tests/test_calculator.py::TestReplaceCurrentInput -q
+python3 -m pytest tests/test_calculator.py tests/test_base_converter.py tests/test_programmer_ui.py -q
+python3 -m pytest -q
+python3 -m py_compile calculator.py source/calculator_engine.py tests/test_calculator.py
+git diff --check
+```
+
+Result:
+
+```text
+4 passed in 0.16s
+50 passed in 0.34s
+76 passed in 0.45s
+py_compile clean
+git diff --check clean
+```
+
 ## Commit Log
 
 _To be updated as PR-03 progresses._
