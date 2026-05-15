@@ -1,0 +1,157 @@
+from decimal import Decimal
+
+from source.calculator_engine import CalculatorEngine
+from source.memory_store import MemoryStore
+from source.mode_controllers import DateModeController, ProgrammerModeController, StandardModeController
+
+
+def test_standard_controller_memory_store_and_recall():
+    engine = CalculatorEngine()
+    memory = MemoryStore()
+    controller = StandardModeController(engine, memory)
+
+    controller.handle_button("1")
+    controller.handle_button("2")
+    assert controller.handle_button("MS") == "12"
+    assert memory.recall() == Decimal("12")
+
+    controller.handle_button("AC")
+    assert controller.handle_button("MR") == "12"
+
+
+def test_standard_controller_memory_add_and_subtract():
+    engine = CalculatorEngine()
+    memory = MemoryStore()
+    controller = StandardModeController(engine, memory)
+
+    controller.handle_button("1")
+    controller.handle_button("0")
+    controller.handle_button("MS")
+    controller.handle_button("AC")
+    controller.handle_button("2")
+    controller.handle_button("M+")
+    assert memory.recall() == Decimal("12")
+    controller.handle_button("3")
+    controller.handle_button("M-")
+    assert memory.recall() == Decimal("-11")
+
+
+def test_standard_controller_memory_recall_preserves_pending_operation():
+    engine = CalculatorEngine()
+    memory = MemoryStore()
+    controller = StandardModeController(engine, memory)
+
+    controller.handle_button("5")
+    controller.handle_button("+")
+    memory.store(Decimal("12"))
+    assert controller.handle_button("MR") == "12"
+    assert controller.handle_button("=") == "17"
+
+
+def test_standard_controller_memory_store_ignores_error_display():
+    engine = CalculatorEngine()
+    memory = MemoryStore()
+    controller = StandardModeController(engine, memory)
+
+    memory.store(Decimal("9"))
+    controller.handle_button("5")
+    controller.handle_button("÷")
+    controller.handle_button("0")
+    controller.handle_button("=")
+    assert engine.get_display() == "Error"
+    assert controller.handle_button("MS") == "Error"
+    assert memory.recall() == Decimal("9")
+
+
+def test_standard_controller_memory_clear():
+    engine = CalculatorEngine()
+    memory = MemoryStore()
+    controller = StandardModeController(engine, memory)
+
+    memory.store(Decimal("9"))
+    assert controller.handle_button("MC") == "0"
+    assert memory.recall() == Decimal("0")
+    assert not memory.has_value
+
+
+def test_programmer_controller_hex_c_is_digit_and_ac_clears():
+    controller = ProgrammerModeController()
+    controller.set_base("HEX")
+    controller.programmer_value = "AB"
+
+    assert controller.handle_button("C") == "ABC"
+    assert controller.programmer_value == "ABC"
+    assert controller.handle_button("AC") == "0"
+    assert controller.programmer_value == "0"
+
+
+def test_programmer_controller_blocks_64_bit_overflow():
+    controller = ProgrammerModeController()
+    controller.set_base("HEX")
+    controller.programmer_value = "F" * 16
+
+    assert controller.handle_button("F") == "F" * 16
+    assert controller.programmer_value == "F" * 16
+
+
+def test_programmer_controller_switches_base_and_ignores_invalid_digit():
+    controller = ProgrammerModeController()
+    assert controller.handle_button("1") == "1"
+    assert controller.handle_button("5") == "15"
+    assert controller.set_base("HEX") == "F"
+    assert controller.current_base == "HEX"
+    assert controller.set_base("BIN") == "1111"
+    assert controller.handle_button("2") == "1111"
+
+
+def test_programmer_controller_button_state_rules():
+    controller = ProgrammerModeController()
+    controller.set_base("BIN")
+    states = controller.button_states()
+
+    assert states["0"] == "normal"
+    assert states["1"] == "normal"
+    assert states["2"] == "disabled"
+    assert states["A"] == "disabled"
+
+
+
+
+
+def test_date_controller_enter_initializes_safe_display():
+    controller = DateModeController()
+    assert controller.enter() == "Date Mode"
+
+
+def test_date_controller_difference_formats_day_singular_plural_and_negative():
+    controller = DateModeController()
+    assert controller.calculate_difference("2026-05-15", "2026-05-16") == "1 day"
+    assert controller.calculate_difference("2026-05-15", "2026-05-17") == "2 days"
+    assert controller.calculate_difference("2026-05-16", "2026-05-15") == "-1 day"
+    assert controller.calculate_difference("2026-05-17", "2026-05-15") == "-2 days"
+
+
+def test_date_controller_invalid_date_returns_controlled_message():
+    controller = DateModeController()
+    assert controller.calculate_difference("2026-02-30", "2026-03-01") == "Invalid date"
+
+
+def test_date_controller_add_duration_returns_iso_date():
+    controller = DateModeController()
+    assert controller.calculate_duration(
+        "2024-01-31", operation="add", years="1", months="1", weeks="", days="5"
+    ) == "2025-03-05"
+
+
+def test_date_controller_invalid_duration_returns_controlled_message():
+    controller = DateModeController()
+    assert controller.calculate_duration(
+        "2026-05-15", operation="add", years="", months="", weeks="", days="abc"
+    ) == "Invalid duration"
+
+
+def test_date_controller_subtract_duration_returns_iso_date():
+    controller = DateModeController()
+    assert controller.calculate_duration(
+        "2024-03-31", operation="subtract", years="", months="1", weeks="", days=""
+    ) == "2024-02-29"

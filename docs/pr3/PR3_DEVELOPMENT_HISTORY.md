@@ -220,6 +220,59 @@ py_compile clean
 git diff --check clean
 ```
 
+
+### 2026-05-15 12:42 — Phase 3 controllers headless layer
+
+TDD RED / GREEN sequence:
+
+1. Standard controller memory tests first.
+   - RED: `ModuleNotFoundError: No module named 'source.mode_controllers'`.
+   - GREEN: implemented `StandardModeController`.
+2. Programmer controller tests next.
+   - RED: `ImportError: cannot import name 'ProgrammerModeController'`.
+   - GREEN: implemented `ProgrammerModeController`.
+3. Date controller tests next.
+   - RED: `ImportError: cannot import name 'DateModeController'`.
+   - GREEN: implemented `DateModeController`.
+
+Implemented:
+
+- `source/mode_controllers.py`
+  - `StandardModeController`
+  - `ProgrammerModeController`
+  - `DateModeController`
+- `tests/test_mode_controllers.py`
+
+Coverage highlights:
+
+- `MS`, `MR`, `M+`, `M-`, `MC`.
+- `MR` preserves pending Standard operation.
+- Memory store ignores `Error` display.
+- Programmer HEX `C` digit vs `AC` clear.
+- Programmer 64-bit overflow guard.
+- Programmer base switching and button-state rules.
+- Date difference singular/plural and negative formatting.
+- Date invalid date / invalid duration controlled messages.
+- Date duration add/subtract integration through controller.
+
+Verification:
+
+```bash
+python3 -m pytest tests/test_mode_controllers.py -q
+python3 -m pytest -q
+python3 -m py_compile source/mode_controllers.py tests/test_mode_controllers.py
+git diff --check
+```
+
+Result:
+
+```text
+15 passed in 0.18s
+91 passed in 0.51s
+py_compile clean
+git diff --check clean
+```
+
 ## Commit Log
 
 _To be updated as PR-03 progresses._
