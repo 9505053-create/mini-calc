@@ -33,3 +33,62 @@ Next:
 1. Run baseline verification.
 2. Commit and push planning docs.
 3. Start TDD for Standard chaining history.
+
+## 2026-05-15 — Baseline and planning backup
+
+Actions:
+
+- Baseline verification after creating PR-05 planning docs:
+  - `python3 -m pytest -q` -> `115 passed in 0.65s`.
+  - `git diff --check` -> clean.
+- Commit: `cb1a36a docs: add PR5 final release planning`.
+- Push: `origin/pr5-final-release`.
+
+## 2026-05-15 — Phase 1 Standard chaining history TDD
+
+RED:
+
+- Added controller tests for:
+  - operator chaining history (`1 + 2 +` -> history `1 + 2 = 3`),
+  - operator replacement no-history (`1 + -`),
+  - controlled chaining error history (`5 ÷ 0 +`),
+  - keyboard operator chaining history.
+- Verified RED:
+  - `python3 -m pytest tests/test_mode_controllers.py::test_standard_controller_records_chaining_operator_history_entry tests/test_mode_controllers.py::test_standard_controller_operator_replacement_does_not_record_history tests/test_mode_controllers.py::test_standard_controller_records_chaining_controlled_error_history_entry tests/test_mode_controllers.py::test_standard_controller_records_keyboard_operator_chaining_history_entry -q`
+  - Result: `3 failed, 1 passed`.
+  - Expected failure: `pop_history_entry()` returned `None` for chaining calculations.
+
+GREEN:
+
+- Added controller-side `_press_operator_with_history()` capture around `CalculatorEngine.press_operator()`.
+- Reused `_pending_expression_text()` and factored `_record_history_entry()` to keep `=` and chaining history consistent.
+- Verification:
+  - Targeted chaining tests -> `4 passed`.
+  - `python3 -m pytest tests/test_mode_controllers.py -q` -> `30 passed`.
+
+## 2026-05-15 — Phase 2 UI history regression
+
+- Added fake-widget UI coverage for Standard chaining history appending into the visible History panel without launching Tk.
+- Verification:
+  - `python3 -m pytest tests/test_programmer_ui.py::test_standard_ui_records_chaining_calculation_history tests/test_programmer_ui.py -q` -> `10 passed`.
+
+## 2026-05-15 — PR-05 local final gate
+
+Command:
+
+```bash
+python3 -m pytest -q && \
+python3 -m py_compile calculator.py source/*.py tests/*.py && \
+git diff --check
+```
+
+Result:
+
+- `120 passed in 0.62s`.
+- `py_compile` clean.
+- `git diff --check` clean.
+
+Remaining before final merge recommendation:
+
+- Tkinter smoke evidence.
+- Final cumulative 3AI implementation review.

@@ -215,6 +215,19 @@ def test_standard_ui_records_completed_calculation_history_and_clear_history():
     assert ui.history_text.content == ""
 
 
+def test_standard_ui_records_chaining_calculation_history():
+    ui = make_standard_ui()
+
+    ui.handle_button("1")
+    ui.handle_button("+")
+    ui.handle_button("2")
+    ui.handle_button("+")
+
+    assert ui.display_var.value == "3"
+    assert ui.history_text.content == "[Standard] 1 + 2 = 3"
+    assert len(ui.history_store.entries()) == 1
+
+
 def test_date_ui_records_history_after_successful_difference():
     ui = make_date_ui()
 

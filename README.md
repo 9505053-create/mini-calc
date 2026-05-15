@@ -1,6 +1,6 @@
 # MiniCalc
 
-一個小而美的 Python 計算機，使用 Tkinter GUI + headless 計算核心。PR-04 增加 session-only Calculation History / Session Tape；PR-03 增加 Date Calculator、Standard Mode Memory Keys，並把模式邏輯整理到 headless controllers，方便測試與後續擴充。
+一個小而美的 Python 計算機，使用 Tkinter GUI + headless 計算核心。PR-05 完成 final release hardening 與 Standard chaining history；PR-04 增加 session-only Calculation History / Session Tape；PR-03 增加 Date Calculator、Standard Mode Memory Keys，並把模式邏輯整理到 headless controllers，方便測試與後續擴充。
 
 ## 架構
 
@@ -24,7 +24,7 @@
 
 - Standard Mode：四則運算、小數、百分比、正負號切換、退格與鍵盤輸入
 - Calculation History（session-only）：
-  - Standard Mode：記錄 `=` / keyboard Enter 完成的計算與 controlled errors
+  - Standard Mode：記錄 `=` / keyboard Enter 完成的計算、operator chaining 完成的 immediate-execution 計算，以及 controlled errors
   - Date Mode：記錄成功日期差與日期加減
   - Programmer Mode：記錄成功 base conversion
   - `Clear History` 清除目前 session 歷史
@@ -52,10 +52,11 @@ python calculator.py
 python -m pytest -q
 ```
 
-目前 PR-04 自動化測試覆蓋 Standard arithmetic、MemoryStore、DateCalculator、HistoryStore、mode controllers、Programmer converter 與 lightweight UI coordination。
+目前 PR-05 自動化測試覆蓋 Standard arithmetic、MemoryStore、DateCalculator、HistoryStore、mode controllers、Programmer converter 與 lightweight UI coordination。
 
 ## 手動 GUI smoke checklist
 
+- PR-05 final release：`docs/pr5/PR5_SMOKE_CHECKLIST.md`
 - PR-04：`docs/pr4/PR4_SMOKE_CHECKLIST.md`
 - PR-03：`docs/pr3/PR3_SMOKE_CHECKLIST.md`
 - Programmer Mode 專項：`docs/programmer_mode_smoke_checklist.md`
@@ -89,7 +90,7 @@ Memory Keys 僅在 Standard Mode 啟用：
 
 History panel 會顯示目前 session 的近期計算：
 
-- Standard：只記錄按 `=` 或鍵盤 Enter 完成的計算；controlled error 也會記錄，例如除以零。
+- Standard：記錄按 `=`、鍵盤 Enter，或按第二個運算子完成 immediate-execution chaining 的計算；controlled error 也會記錄，例如除以零。
 - Date：只記錄成功的日期差或日期加減。
 - Programmer：只記錄成功切換 base 的 conversion；輸入 digit、backspace、same-base click 不會產生歷史。
 

@@ -1,5 +1,30 @@
 # MiniCalc v1.0 Release Notes
 
+## PR-05 Final Release Hardening / Standard Chaining History
+
+### Summary
+
+PR-05 closes the final release-hardening loop by adding the deferred Standard Mode immediate-execution chaining history behavior and preparing cumulative PR-04/PR-05 verification artifacts.
+
+### Features
+
+- Standard Mode now records history when pressing a second operator completes a pending calculation.
+- Example: `1 + 2 +` displays `3` and records `Standard: 1 + 2 = 3`.
+- Operator replacement without a second operand, such as `1 + -`, records no history.
+- Controlled chaining errors, such as `5 ÷ 0 +`, record `status="error"` history.
+
+### Quality
+
+- Added controller tests for chaining history, operator replacement no-history, keyboard operator chaining, and controlled chaining error history.
+- Added fake-widget UI coverage for Standard chaining history panel updates.
+- Preserved the PR-04 `pop_history_entry()` seam and display-string controller contract.
+
+### Verification
+
+- `python3 -m pytest -q` → 120 passed.
+- `python3 -m py_compile calculator.py source/*.py tests/*.py` → clean.
+- `git diff --check` → clean.
+
 ## PR-04 Calculation History / Session Tape
 
 ### Summary
@@ -32,7 +57,7 @@ PR-04 adds an in-memory, session-only Calculation History panel so users can ins
 
 - History is not persisted across app restarts.
 - History cannot yet be exported, searched, copied, or clicked to restore inputs.
-- Standard Mode chaining such as `1 + 2 +` updates the display but does not create a PR-04 history entry.
+- Standard Mode chaining such as `1 + 2 +` is covered by PR-05.
 - Manual visible Tkinter smoke remains recommended before merge.
 
 ## PR-03 Date Calculator, Memory Keys, and Mode Controllers

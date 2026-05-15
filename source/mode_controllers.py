@@ -38,7 +38,7 @@ class StandardModeController:
         if label == ".":
             return self.engine.press_decimal()
         if label in {"+", "-", "×", "÷"}:
-            return self.engine.press_operator(operator_map.get(label, label))
+            return self._press_operator_with_history(operator_map.get(label, label))
         if label == "=":
             return self._press_equals_with_history()
         if label in {"CLEAR", "AC", "C"}:
@@ -60,7 +60,7 @@ class StandardModeController:
         if char == ".":
             return self.engine.press_decimal()
         if char and char in "+-*/":
-            return self.engine.press_operator(char)
+            return self._press_operator_with_history(char)
         if char == "%":
             return self.engine.press_percent()
         if key in ("Return", "KP_Enter"):
@@ -75,14 +75,24 @@ class StandardModeController:
         expression = self._pending_expression_text()
         result = self.engine.press_equals()
         if expression is not None:
-            status = "error" if result in {"Error", "Overflow"} else "ok"
-            self._history_entry = HistoryEntry(
-                mode=self.name,
-                expression=expression,
-                result=result,
-                status=status,
-            )
+            self._record_history_entry(expression, result)
         return result
+
+    def _press_operator_with_history(self, operator: str) -> str:
+        expression = self._pending_expression_text()
+        result = self.engine.press_operator(operator)
+        if expression is not None:
+            self._record_history_entry(expression, result)
+        return result
+
+    def _record_history_entry(self, expression: str, result: str) -> None:
+        status = "error" if result in {"Error", "Overflow"} else "ok"
+        self._history_entry = HistoryEntry(
+            mode=self.name,
+            expression=expression,
+            result=result,
+            status=status,
+        )
 
     def _pending_expression_text(self) -> str | None:
         if (

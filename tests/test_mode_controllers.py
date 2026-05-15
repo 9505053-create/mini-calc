@@ -117,16 +117,69 @@ def test_standard_controller_records_controlled_error_history_entry():
     )
 
 
-def test_standard_controller_does_not_record_digit_memory_or_chaining_actions():
+def test_standard_controller_does_not_record_digit_or_memory_actions():
     controller = StandardModeController(CalculatorEngine(), MemoryStore())
 
     controller.handle_button("1")
     controller.handle_button("MS")
+
+    assert controller.pop_history_entry() is None
+
+
+def test_standard_controller_records_chaining_operator_history_entry():
+    controller = StandardModeController(CalculatorEngine(), MemoryStore())
+
+    controller.handle_button("1")
     controller.handle_button("+")
     controller.handle_button("2")
     assert controller.handle_button("+") == "3"
 
+    assert controller.pop_history_entry() == HistoryEntry(
+        mode="Standard", expression="1 + 2", result="3"
+    )
     assert controller.pop_history_entry() is None
+
+    controller.handle_button("3")
+    assert controller.handle_button("=") == "6"
+    assert controller.pop_history_entry() == HistoryEntry(
+        mode="Standard", expression="3 + 3", result="6"
+    )
+
+
+def test_standard_controller_operator_replacement_does_not_record_history():
+    controller = StandardModeController(CalculatorEngine(), MemoryStore())
+
+    controller.handle_button("1")
+    controller.handle_button("+")
+    assert controller.handle_button("-") == "1"
+
+    assert controller.pop_history_entry() is None
+
+
+def test_standard_controller_records_chaining_controlled_error_history_entry():
+    controller = StandardModeController(CalculatorEngine(), MemoryStore())
+
+    controller.handle_button("5")
+    controller.handle_button("÷")
+    controller.handle_button("0")
+    assert controller.handle_button("+") == "Error"
+
+    assert controller.pop_history_entry() == HistoryEntry(
+        mode="Standard", expression="5 ÷ 0", result="Error", status="error"
+    )
+
+
+def test_standard_controller_records_keyboard_operator_chaining_history_entry():
+    controller = StandardModeController(CalculatorEngine(), MemoryStore())
+
+    controller.handle_key("", "4")
+    controller.handle_key("", "*")
+    controller.handle_key("", "5")
+    assert controller.handle_key("", "+") == "20"
+
+    assert controller.pop_history_entry() == HistoryEntry(
+        mode="Standard", expression="4 × 5", result="20"
+    )
 
 def test_programmer_controller_hex_c_is_digit_and_ac_clears():
     controller = ProgrammerModeController()
