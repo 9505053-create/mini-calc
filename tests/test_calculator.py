@@ -1,10 +1,3 @@
-import pathlib
-import sys
-
-PROJECT_ROOT = pathlib.Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PROJECT_ROOT / "source"))
-sys.path.insert(0, str(PROJECT_ROOT))
-
 from calculator import CalculatorEngine
 
 
@@ -178,7 +171,7 @@ class TestBackspace:
     def test_backspace_negative(self):
         engine = CalculatorEngine()
         result = press_sequence(engine, ["1", "2", "+/-", "BS"])
-        assert result == "-0" or result == "0" or result == "-1"
+        assert result == "-1"
 
     def test_backspace_on_result_noop(self):
         engine = CalculatorEngine()

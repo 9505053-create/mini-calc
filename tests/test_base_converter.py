@@ -1,12 +1,6 @@
-import pathlib
-import sys
-
 import pytest
 
-PROJECT_ROOT = pathlib.Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PROJECT_ROOT / "source"))
-
-from base_converter import BaseConverter
+from source.base_converter import BaseConverter
 
 
 def test_decimal_conversions():
@@ -79,3 +73,16 @@ def test_backspace_returns_zero_when_empty():
     converter = BaseConverter()
     assert converter.backspace("F") == "0"
     assert converter.backspace("FF") == "F"
+
+
+def test_append_digit_enforces_unsigned_64_bit_limit():
+    converter = BaseConverter()
+    max_hex = "F" * 16
+    assert converter.append_digit(max_hex[:-1], "F", "HEX") == max_hex
+    assert converter.append_digit(max_hex, "F", "HEX") == max_hex
+
+
+def test_convert_rejects_values_beyond_unsigned_64_bit_limit():
+    converter = BaseConverter()
+    with pytest.raises(ValueError, match="exceeds 64-bit"):
+        converter.convert("1" + "0" * 64, "BIN", "DEC")

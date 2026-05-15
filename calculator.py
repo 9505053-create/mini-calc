@@ -366,7 +366,7 @@ class CalculatorUI:
             self.base_buttons[label] = button
 
         layout = [
-            ["C", "+/-", "%", "÷"],
+            ["AC", "+/-", "%", "÷"],
             ["7", "8", "9", "×"],
             ["4", "5", "6", "-"],
             ["1", "2", "3", "+"],
@@ -384,7 +384,7 @@ class CalculatorUI:
                     font=button_font,
                     bd=0,
                     relief="flat",
-                    command=lambda value=label: self.handle_button("CLEAR" if value == "C" else value),
+                    command=lambda value=label: self.handle_button(value),
                     bg=self._button_color(label),
                     fg="#ffffff",
                     activebackground=self._active_color(label),
@@ -448,7 +448,7 @@ class CalculatorUI:
             text = self.engine.press_operator(operator_map.get(label, label))
         elif label == "=":
             text = self.engine.press_equals()
-        elif label == "CLEAR":
+        elif label in {"CLEAR", "AC"}:
             text = self.engine.press_clear()
         elif label == "+/-":
             text = self.engine.press_toggle_sign()
@@ -519,7 +519,7 @@ class CalculatorUI:
         if label in BaseConverter.BASES:
             self.set_base(label)
             return
-        if label == "CLEAR":
+        if label in {"CLEAR", "AC"}:
             self.programmer_value = "0"
         elif label in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"}:
             self.programmer_value = self.base_converter.append_digit(
@@ -571,7 +571,7 @@ class CalculatorUI:
     def _button_color(self, label: str) -> str:
         if label in {"=", "+", "-", "×", "÷"}:
             return "#007acc"
-        if label == "C":
+        if label == "AC":
             return "#a83232"
         if label in {"+/-", "%"}:
             return "#3a3a3a"
@@ -580,7 +580,7 @@ class CalculatorUI:
     def _active_color(self, label: str) -> str:
         if label in {"=", "+", "-", "×", "÷"}:
             return "#168ddd"
-        if label == "C":
+        if label == "AC":
             return "#c23d3d"
         return "#454545"
 

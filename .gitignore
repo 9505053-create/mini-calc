@@ -14,6 +14,7 @@ Thumbs.db
 
 # pytest
 .pytest_cache/
+pytest-cache-files-*/
 
 # Build artifacts
 build/

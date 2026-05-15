@@ -1,5 +1,31 @@
 # MiniCalc v1.0 Release Notes
 
+## PR-02.1 Programmer Mode Hardening
+
+### Summary
+
+PR-02.1 applies the 3AI review follow-up items for PR-02 before PR-03 work begins. It does not add a new product mode; it hardens the Programmer Mode and local verification workflow.
+
+### Changes
+
+- Added `pytest.ini` so root-level `python -m pytest -q` discovers only `tests/` and ignores stale `pytest-cache-files-*` directories.
+- Added `pytest-cache-files-*/` to `.gitignore`.
+- Standardized `BaseConverter` imports in tests through `source.base_converter` and centralized test path setup in `tests/conftest.py`.
+- Added a 64-bit unsigned integer limit to Programmer Mode conversion and append behavior.
+- Renamed the visible clear button from `C` to `AC` to avoid confusion with HEX digit `C`.
+- Added lightweight Programmer Mode UI coordination tests that use fake widgets instead of launching Tkinter.
+- Tightened the Standard Mode negative-backspace regression assertion.
+- Added `docs/programmer_mode_smoke_checklist.md` for manual GUI verification.
+
+### Verification
+
+- `python3 -m pytest -q` → 46 passed.
+
+### Known Limits
+
+- Programmer Mode remains non-negative-integer conversion only.
+- Full per-mode controller refactor is deferred until PR-03 planning.
+
 ## PR-02 Programmer Mode
 
 ### Summary
