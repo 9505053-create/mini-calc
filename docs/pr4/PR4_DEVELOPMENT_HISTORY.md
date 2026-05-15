@@ -89,3 +89,22 @@ GREEN:
   - `python3 -m pytest -q` -> `101 passed`.
   - `python3 -m py_compile source/history_store.py tests/test_history_store.py` -> clean.
   - `git diff --check` -> clean.
+
+
+## 2026-05-15 — PR-04 Task 2 Standard Mode history events
+
+RED:
+
+- Added controller tests for Standard `=` history, keyboard `Return` history, controlled divide-by-zero error history, and non-recorded digit/memory/chaining actions.
+- Verified RED: `test_standard_controller_records_equals_history_entry` failed with `AttributeError: 'StandardModeController' object has no attribute 'pop_history_entry'`.
+
+GREEN:
+
+- Added a narrow `pop_history_entry()` drain seam to `StandardModeController` while preserving display-string return values.
+- Captured Standard expression context before `press_equals()` so controlled errors like divide-by-zero can still record `5 ÷ 0 = Error`.
+- Fixed an existing keyboard routing edge case discovered by the new test: empty `char` was matching `char in "+-*/"`; now operator-key routing requires a non-empty char.
+- Verification:
+  - `python3 -m pytest tests/test_mode_controllers.py -q` -> `19 passed`.
+  - `python3 -m pytest -q` -> `105 passed`.
+  - `python3 -m py_compile source/mode_controllers.py tests/test_mode_controllers.py` -> clean.
+  - `git diff --check` -> clean.

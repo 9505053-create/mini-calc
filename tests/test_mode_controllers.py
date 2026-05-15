@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from source.calculator_engine import CalculatorEngine
+from source.history_store import HistoryEntry
 from source.memory_store import MemoryStore
 from source.mode_controllers import DateModeController, ProgrammerModeController, StandardModeController
 
@@ -73,6 +74,59 @@ def test_standard_controller_memory_clear():
     assert memory.recall() == Decimal("0")
     assert not memory.has_value
 
+
+
+
+def test_standard_controller_records_equals_history_entry():
+    controller = StandardModeController(CalculatorEngine(), MemoryStore())
+
+    controller.handle_button("2")
+    controller.handle_button("+")
+    controller.handle_button("3")
+    assert controller.handle_button("=") == "5"
+
+    assert controller.pop_history_entry() == HistoryEntry(
+        mode="Standard", expression="2 + 3", result="5"
+    )
+    assert controller.pop_history_entry() is None
+
+
+def test_standard_controller_records_keyboard_enter_history_entry():
+    controller = StandardModeController(CalculatorEngine(), MemoryStore())
+
+    controller.handle_button("8")
+    controller.handle_button("÷")
+    controller.handle_button("4")
+    assert controller.handle_key("Return", "") == "2"
+
+    assert controller.pop_history_entry() == HistoryEntry(
+        mode="Standard", expression="8 ÷ 4", result="2"
+    )
+
+
+def test_standard_controller_records_controlled_error_history_entry():
+    controller = StandardModeController(CalculatorEngine(), MemoryStore())
+
+    controller.handle_button("5")
+    controller.handle_button("÷")
+    controller.handle_button("0")
+    assert controller.handle_button("=") == "Error"
+
+    assert controller.pop_history_entry() == HistoryEntry(
+        mode="Standard", expression="5 ÷ 0", result="Error", status="error"
+    )
+
+
+def test_standard_controller_does_not_record_digit_memory_or_chaining_actions():
+    controller = StandardModeController(CalculatorEngine(), MemoryStore())
+
+    controller.handle_button("1")
+    controller.handle_button("MS")
+    controller.handle_button("+")
+    controller.handle_button("2")
+    assert controller.handle_button("+") == "3"
+
+    assert controller.pop_history_entry() is None
 
 def test_programmer_controller_hex_c_is_digit_and_ac_clears():
     controller = ProgrammerModeController()

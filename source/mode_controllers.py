@@ -7,6 +7,7 @@ from decimal import Decimal, InvalidOperation
 from source.base_converter import BaseConverter
 from source.calculator_engine import CalculatorEngine
 from source.date_calculator import DateCalculator
+from source.history_store import HistoryEntry
 from source.memory_store import MemoryStore
 
 
@@ -18,11 +19,19 @@ class StandardModeController:
     def __init__(self, engine: CalculatorEngine, memory: MemoryStore) -> None:
         self.engine = engine
         self.memory = memory
+        self._history_entry: HistoryEntry | None = None
 
     def enter(self, previous_display: str | None = None) -> str:
+        self._history_entry = None
         return self.engine.get_display()
 
+    def pop_history_entry(self) -> HistoryEntry | None:
+        entry = self._history_entry
+        self._history_entry = None
+        return entry
+
     def handle_button(self, label: str) -> str:
+        self._history_entry = None
         operator_map = {"×": "*", "÷": "/"}
         if label.isdigit():
             return self.engine.press_digit(label)
@@ -31,7 +40,7 @@ class StandardModeController:
         if label in {"+", "-", "×", "÷"}:
             return self.engine.press_operator(operator_map.get(label, label))
         if label == "=":
-            return self.engine.press_equals()
+            return self._press_equals_with_history()
         if label in {"CLEAR", "AC", "C"}:
             return self.engine.press_clear()
         if label == "+/-":
@@ -45,21 +54,58 @@ class StandardModeController:
         return self.engine.get_display()
 
     def handle_key(self, key: str, char: str) -> str | None:
+        self._history_entry = None
         if char and char.isdigit():
             return self.engine.press_digit(char)
         if char == ".":
             return self.engine.press_decimal()
-        if char in "+-*/":
+        if char and char in "+-*/":
             return self.engine.press_operator(char)
         if char == "%":
             return self.engine.press_percent()
         if key in ("Return", "KP_Enter"):
-            return self.engine.press_equals()
+            return self._press_equals_with_history()
         if key == "Escape":
             return self.engine.press_clear()
         if key == "BackSpace":
             return self.engine.press_backspace()
         return None
+
+    def _press_equals_with_history(self) -> str:
+        expression = self._pending_expression_text()
+        result = self.engine.press_equals()
+        if expression is not None:
+            status = "error" if result in {"Error", "Overflow"} else "ok"
+            self._history_entry = HistoryEntry(
+                mode=self.name,
+                expression=expression,
+                result=result,
+                status=status,
+            )
+        return result
+
+    def _pending_expression_text(self) -> str | None:
+        if (
+            self.engine.first_operand is None
+            or self.engine.pending_operator is None
+            or self.engine.current_input in (None, "", "-", ".", "-.")
+        ):
+            return None
+        left = self._format_history_operand(self.engine.first_operand)
+        operator = self._display_operator(self.engine.pending_operator)
+        right = self.engine.current_input
+        return f"{left} {operator} {right}"
+
+    @staticmethod
+    def _display_operator(operator: str) -> str:
+        return {"*": "×", "/": "÷"}.get(operator, operator)
+
+    @staticmethod
+    def _format_history_operand(value: Decimal) -> str:
+        text = format(value, "f")
+        if "." in text:
+            text = text.rstrip("0").rstrip(".")
+        return text or "0"
 
     def _handle_memory_button(self, label: str) -> str:
         display = self.engine.get_display()
