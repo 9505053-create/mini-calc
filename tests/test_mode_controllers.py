@@ -158,6 +158,42 @@ def test_programmer_controller_switches_base_and_ignores_invalid_digit():
     assert controller.handle_button("2") == "1111"
 
 
+
+
+def test_programmer_controller_records_base_switch_history_entry():
+    controller = ProgrammerModeController()
+    controller.handle_button("2")
+    controller.handle_button("5")
+    controller.handle_button("5")
+
+    assert controller.set_base("HEX") == "FF"
+
+    assert controller.pop_history_entry() == HistoryEntry(
+        mode="Programmer", expression="DEC 255 → HEX", result="FF"
+    )
+
+
+def test_programmer_controller_records_normalized_base_switch_history_entry():
+    controller = ProgrammerModeController()
+    controller.programmer_value = "000255"
+
+    assert controller.set_base("HEX") == "FF"
+
+    assert controller.pop_history_entry() == HistoryEntry(
+        mode="Programmer", expression="DEC 255 → HEX", result="FF"
+    )
+
+
+def test_programmer_controller_same_base_digits_and_clear_do_not_record_history():
+    controller = ProgrammerModeController()
+
+    controller.handle_button("1")
+    controller.handle_button("BS")
+    controller.handle_button("AC")
+    assert controller.set_base("DEC") == "0"
+
+    assert controller.pop_history_entry() is None
+
 def test_programmer_controller_button_state_rules():
     controller = ProgrammerModeController()
     controller.set_base("BIN")

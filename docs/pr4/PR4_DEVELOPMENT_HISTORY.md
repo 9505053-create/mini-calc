@@ -128,3 +128,22 @@ GREEN:
   - `python3 -m pytest -q` -> `109 passed`.
   - `python3 -m py_compile source/mode_controllers.py tests/test_mode_controllers.py` -> clean.
   - `git diff --check` -> clean.
+
+
+## 2026-05-15 — PR-04 Task 4 Programmer Mode conversion history
+
+RED:
+
+- Added Programmer controller tests for base-switch history, normalized input history, and same-base/digit/backspace/clear no-history behavior.
+- Verified RED: `test_programmer_controller_records_base_switch_history_entry` failed with `AttributeError: 'ProgrammerModeController' object has no attribute 'pop_history_entry'`.
+
+GREEN:
+
+- Added `pop_history_entry()` to `ProgrammerModeController`.
+- Successful base changes now emit normalized conversion history such as `DEC 255 → HEX = FF`.
+- Same-base clicks, digit entry, backspace, clear, ignored invalid input, and failed conversion leave no pending history entry.
+- Verification:
+  - `python3 -m pytest tests/test_mode_controllers.py -q` -> `26 passed`.
+  - `python3 -m pytest -q` -> `112 passed`.
+  - `python3 -m py_compile source/mode_controllers.py tests/test_mode_controllers.py` -> clean.
+  - `git diff --check` -> clean.

@@ -142,24 +142,42 @@ class ProgrammerModeController:
         self.base_converter = base_converter or BaseConverter()
         self.current_base = "DEC"
         self.programmer_value = "0"
+        self._history_entry: HistoryEntry | None = None
 
     def enter(self, previous_display: str | None = None) -> str:
+        self._history_entry = None
         self.current_base = "DEC"
         self.programmer_value = previous_display if previous_display and previous_display.isdigit() else "0"
         return self.programmer_value
 
+    def pop_history_entry(self) -> HistoryEntry | None:
+        entry = self._history_entry
+        self._history_entry = None
+        return entry
+
     def set_base(self, base: str) -> str:
+        self._history_entry = None
         if base == self.current_base:
             return self.programmer_value
-        self.programmer_value = self.base_converter.convert(
-            self.programmer_value, self.current_base, base
-        )
+        old_base = self.current_base
+        old_value = self.base_converter.normalize(self.programmer_value, old_base)
+        try:
+            converted = self.base_converter.convert(self.programmer_value, old_base, base)
+        except ValueError:
+            return self.programmer_value
+        self.programmer_value = converted
         self.current_base = base
+        self._history_entry = HistoryEntry(
+            mode=self.name,
+            expression=f"{old_base} {old_value} → {base}",
+            result=converted,
+        )
         return self.programmer_value
 
     def handle_button(self, label: str) -> str:
         if label in BaseConverter.BASES:
             return self.set_base(label)
+        self._history_entry = None
         if label in {"CLEAR", "AC"}:
             self.programmer_value = "0"
         elif label in BaseConverter.VALID_DIGITS["HEX"]:
