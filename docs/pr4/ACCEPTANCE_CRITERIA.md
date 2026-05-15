@@ -36,37 +36,37 @@ git diff --check
 
 ### Standard Mode history
 
-- Completed arithmetic calculation records one history entry.
+- Explicit `=` button completion records one history entry.
+- Keyboard `Enter` / equals completion records the same entry as the button path.
 - Entry includes mode, expression, result, and status.
 - Digit-only input does not create entries.
-- Clear / backspace / sign toggle alone does not create entries.
+- Immediate-execution chaining such as `1 + 2 +` does not create entries in PR-04.
+- Repeated `=` does not create a new entry unless repeat-equals semantics are added later.
+- Clear / backspace / sign toggle / percent alone does not create entries.
 - Memory keys do not create arithmetic history entries unless they participate in a completed calculation via displayed input.
-- Divide-by-zero creates a controlled history entry or is explicitly skipped; the chosen behavior must be documented and tested.
-
-Preferred behavior:
-
-- Record controlled errors: `5 ÷ 0 = Error` with `status="error"`.
+- Divide-by-zero creates a controlled history entry: `5 ÷ 0 = Error` with `status="error"`.
 
 ### Date Mode history
 
 - Successful date difference records one entry.
 - Successful date duration add/subtract records one entry.
 - Entries include inputs and result in human-readable text.
-- Invalid date/duration input returns controlled UI error and does not add a successful history entry.
+- Invalid date/duration input returns controlled UI error and does not add any history entry in PR-04.
 
 ### Programmer Mode history
 
-- Base-switch conversion records one entry.
-- Entry includes from-base, input value, to-base, converted value.
-- Digit append/backspace does not create entries.
+- Base-switch conversion records one entry only when the base actually changes.
+- Entry includes from-base, normalized input value, to-base, converted value.
+- Same-base click does not create entries.
+- Digit append/backspace/clear does not create entries.
 - Invalid ignored input does not create entries.
 - Failed conversion does not mutate history.
 
 ### UI criteria
 
-- History panel/list is visible or clearly toggleable.
+- History panel/list is visible or clearly toggleable and scrollable.
 - History lines update after completed Standard, Date, and Programmer events.
-- `Clear History` clears both store and visible UI.
+- `Clear History` clears both store and visible UI; this is covered by a headless fake-widget test.
 - Layout remains usable in Standard, Programmer, and Date modes.
 - Existing display and mode controls still work.
 - UI automated tests remain headless; real Tkinter launch is manual smoke only.
@@ -91,9 +91,9 @@ PR-04 must preserve PR-03 behavior:
 
 Planning review should answer:
 
-- Whether recording only `=` for Standard Mode is acceptable or if chaining must be recorded in PR-04.
-- Whether controlled error results should be recorded.
-- Whether `ModeResult` / history-event seam is appropriately minimal.
+- Whether deferring Standard chaining to PR-05+ is acceptable.
+- Whether controlled Standard error results should be recorded while Date invalids are skipped.
+- Whether the `pop_history_entry()` / event-drain seam is appropriately minimal.
 - Whether history UI scope is too broad for PR-04.
 
 Implementation review should return:

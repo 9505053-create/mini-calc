@@ -89,23 +89,25 @@ git commit -m "feat: add history store core"
 
 **Design preference:**
 
-Do not make the UI inspect private `CalculatorEngine` fields after the operation. Add a minimal public seam in `StandardModeController` such as:
+Do not make the UI inspect private `CalculatorEngine` fields after the operation. Use the lower-risk history-drain seam chosen after planning review:
 
 ```python
-@dataclass(frozen=True)
-class ModeResult:
-    display: str
-    history_entry: HistoryEntry | None = None
+class StandardModeController:
+    def pop_history_entry(self) -> HistoryEntry | None:
+        ...
 ```
 
-If returning `ModeResult` from every controller is too broad, use a smaller `last_history_entry` property with tests.
+Controller methods keep returning display strings. Each handled action resets any stale pending history entry before processing, then stores a new entry only if that action completed a recordable calculation.
 
 **Required behavior:**
 
 - `2 + 3 =` emits `Standard: 2 + 3 = 5`.
+- `Enter` / keyboard equals emits the same entry as the `=` button.
 - Digit-only input emits no entry.
-- `5 ÷ 0 =` emits either `Standard: 5 ÷ 0 = Error` or no entry; choose one and document it. Preferred: record controlled error result.
-- `MR`, `MC`, `MS`, `M+`, `M-` do not create arithmetic history entries unless a calculation completes.
+- `1 + 2 +` immediate-execution chaining emits no history entry in PR-04.
+- Repeated `=` emits no new entry unless repeat-equals semantics are added later.
+- `%`, sign toggle, backspace, clear, and memory keys do not create arithmetic history entries by themselves.
+- `5 ÷ 0 =` records `Standard: 5 ÷ 0 = Error` with `status="error"`.
 
 **Verification:**
 
@@ -136,7 +138,7 @@ Required behavior:
 - Difference: `2026-05-15 → 2026-05-20 = 5 days`.
 - Duration add: `2026-01-31 + 1 month = 2026-02-28`.
 - Duration subtract: `2026-03-31 - 1 month = 2026-02-28`.
-- Invalid date/duration emits no successful history entry and returns controlled error display.
+- Invalid date/duration emits no history entry and returns controlled error display.
 
 Verification:
 
@@ -168,7 +170,9 @@ Required behavior:
 - HEX `FF` switch to BIN emits `HEX FF → BIN 11111111`.
 - Digit append/backspace emits no history entry.
 - Invalid ignored input emits no history entry.
+- Same-base click emits no history entry.
 - Failed conversion leaves prior state unchanged and emits no history entry.
+- History text uses normalized values, e.g. `DEC 255 → HEX FF` rather than preserving leading zeroes.
 
 Verification:
 
@@ -197,7 +201,7 @@ git commit -m "feat: record programmer conversion history"
 
 Required UI:
 
-- A compact History panel/list or text widget.
+- A compact scrollable History panel/list or text widget.
 - Clear History button.
 - Standard/Date/Programmer completed events append visible lines.
 - Clear History clears store and UI.

@@ -15,19 +15,21 @@ The feature should make MiniCalc more useful for checking recent calculations wh
 
 ### 2.1 Standard Mode history
 
-Record one history entry whenever a Standard Mode calculation is completed by `=` or by immediate-execution chaining.
+Record one history entry whenever a Standard Mode calculation is explicitly completed by `=` / `Enter`.
 
 Examples:
 
 - `2 + 3 = 5`
 - `5 ÷ 0 = Error`
-- `1 + 2 +` may record the completed `1 + 2 = 3` step if the engine exposes enough context.
 
-Minimum acceptable PR-04 behavior:
+PR-04 intentionally does **not** require immediate-execution chaining history. For example, `1 + 2 +` may update the display to `3`, but it should not create a history entry in PR-04. Chaining can become a PR-05+ enhancement after the engine exposes explicit completion events for operator-press evaluations.
 
-- Completed `=` operations are recorded.
-- Error results are recorded as controlled entries, not crashes.
-- Repeated clear / digit entry alone does not create history.
+Required PR-04 behavior:
+
+- Completed `=` / `Enter` operations are recorded.
+- Controlled Standard errors such as divide-by-zero are recorded with `status="error"`.
+- Repeated `=` does not add a new entry unless the engine later defines repeat-equals semantics.
+- Percent/sign/backspace/clear/digit-only input alone does not create history.
 
 ### 2.2 Date Mode history
 
@@ -110,8 +112,9 @@ Rules:
 Preferred approach:
 
 - Keep `HistoryStore` owned by `CalculatorUI` or a small history controller.
-- Existing mode controllers may return optional history event metadata when they complete a calculation.
-- Tkinter callback code should only append already-formed events; it should not reconstruct complex business logic.
+- Preserve existing display-string return values from controller methods where possible.
+- Add a narrow history-event drain seam such as `pop_history_entry()` / `last_history_entry` on controllers that can emit history.
+- Tkinter callback code should only drain already-formed events and append them to `HistoryStore`; it should not reconstruct complex business logic.
 
 Avoid:
 
@@ -123,12 +126,12 @@ Avoid:
 
 If Standard history requires expression metadata, introduce a minimal public completion-event API rather than reading private fields from the UI.
 
-Possible low-risk path:
+Required low-risk path:
 
-- `StandardModeController.handle_button(label)` returns a small object/string containing display and optional history entry.
-- Or `StandardModeController` tracks the previous operand/operator at the moment `=` is pressed.
-
-Whichever path is chosen must be covered by headless tests.
+- Keep `StandardModeController.handle_button(label)` returning the display string.
+- `StandardModeController` captures the expression context before invoking `press_equals()` for `=` / `Enter`.
+- After the action, the UI or tests can call `pop_history_entry()` to retrieve and clear the pending history event.
+- This seam must be covered by headless tests.
 
 ## 4. Testing scope
 
@@ -147,8 +150,8 @@ Required coverage:
 - Standard error calculation records controlled result or explicitly skips according to final acceptance criteria.
 - Date difference creates a history entry.
 - Date duration calculation creates a history entry.
-- Programmer base-switch conversion creates a history entry.
-- Programmer digit entry creates no entry.
+- Programmer base-switch conversion creates a history entry only when the base actually changes.
+- Programmer same-base click, digit entry, backspace, clear, and ignored invalid input create no entry.
 
 ## 5. Non-goals
 
@@ -179,7 +182,7 @@ Manual GUI smoke should include:
 
 ## 7. Open questions for 3AI review
 
-1. Should Standard Mode immediate-execution chaining record intermediate results in PR-04, or should PR-04 only record `=` operations for lower risk?
-2. Should error results be recorded as history entries or skipped?
-3. Should `HistoryStore` store structured `HistoryEntry` objects only, or also preformatted display strings?
+1. Is deferring Standard immediate-execution chaining to PR-05+ the right risk tradeoff?
+2. Is recording controlled Standard errors with `status="error"` sufficient while skipping invalid Date/Programmer no-op errors?
+3. Is the `pop_history_entry()` seam preferable to broad `ModeResult` migration for PR-04?
 4. Is a persistent history out-of-scope decision correct for PR-04?

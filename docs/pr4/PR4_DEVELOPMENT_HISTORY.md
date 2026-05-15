@@ -53,3 +53,22 @@ Next:
 2. Commit and push `pr4-planning` to GitHub as pre-implementation backup.
 3. Send PR-04 planning package to 3AI reviewers.
 4. Only start PR-04 implementation after planning blockers are cleared.
+
+
+## 2026-05-15 14:18 — PR-04 planning review patches
+
+3AI planning review status:
+
+- Codex: `PASS_WITH_WARNINGS`, no blocker.
+- Gemini: `PASS`, recommended richer chaining history if low risk.
+- Claude: initial process hung with no output and was killed; will retry later if needed.
+
+Decision after review synthesis:
+
+- Follow Codex's lower-risk recommendation for PR-04: record explicit `=` / keyboard Enter completions only; defer Standard immediate-execution chaining history to PR-05+.
+- Record controlled Standard errors such as divide-by-zero with `status="error"`.
+- Skip invalid Date inputs and Programmer no-op/failed/ignored inputs.
+- Use a narrow `pop_history_entry()` history-event drain seam instead of broad `ModeResult` migration to preserve existing display-string controller APIs.
+- Require Programmer same-base clicks to emit no history entry.
+- Require scrollable/toggleable history UI and fake-widget clear-history test.
+- Added `docs/pr4/PR4_SMOKE_CHECKLIST.md`.
