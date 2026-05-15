@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from source.base_converter import BaseConverter
 from source.calculator_engine import CalculatorEngine
+from source.history_store import HistoryStore
 from source.memory_store import MemoryStore
 from source.mode_controllers import DateModeController, ProgrammerModeController, StandardModeController
 
@@ -22,6 +23,7 @@ class CalculatorUI:
         self.standard_controller = StandardModeController(self.engine, self.memory)
         self.programmer_controller = ProgrammerModeController(self.base_converter)
         self.date_controller = DateModeController()
+        self.history_store = HistoryStore()
         self.mode = "Standard"
         self.current_base = self.programmer_controller.current_base
         self.programmer_value = self.programmer_controller.programmer_value
@@ -177,6 +179,7 @@ class CalculatorUI:
             self.hex_buttons.append(button)
 
         self._build_date_widgets(tk, small_button_font)
+        self._build_history_widgets(tk, small_button_font)
 
         for column in range(5):
             self.root.grid_columnconfigure(column, weight=1, minsize=72)
@@ -231,6 +234,41 @@ class CalculatorUI:
             label(name, 2, column)
             entry(variable, 3, column, width=5)
 
+    def _build_history_widgets(self, tk, small_button_font) -> None:
+        self.history_frame = tk.Frame(self.root, bg="#1e1e1e")
+        self.history_frame.grid(row=12, column=0, columnspan=5, padx=4, pady=4, sticky="nsew")
+
+        header = tk.Frame(self.history_frame, bg="#1e1e1e")
+        header.grid(row=0, column=0, columnspan=2, sticky="ew")
+        tk.Label(
+            header,
+            text="History",
+            font=small_button_font,
+            bg="#1e1e1e",
+            fg="#ffffff",
+        ).grid(row=0, column=0, padx=2, pady=2, sticky="w")
+        tk.Button(header, text="Clear History", command=self.clear_history).grid(
+            row=0, column=1, padx=2, pady=2, sticky="e"
+        )
+        header.grid_columnconfigure(0, weight=1)
+
+        self.history_text = tk.Text(
+            self.history_frame,
+            height=5,
+            width=38,
+            bg="#111111",
+            fg="#dcdcdc",
+            insertbackground="#ffffff",
+            relief="flat",
+            wrap="none",
+        )
+        scrollbar = tk.Scrollbar(self.history_frame, command=self.history_text.yview)
+        self.history_text.configure(yscrollcommand=scrollbar.set, state="disabled")
+        self.history_text.grid(row=1, column=0, sticky="nsew")
+        scrollbar.grid(row=1, column=1, sticky="ns")
+        self.history_frame.grid_columnconfigure(0, weight=1)
+        self.history_frame.grid_rowconfigure(1, weight=1)
+
     def run(self) -> None:
         self.root.mainloop()
 
@@ -242,6 +280,7 @@ class CalculatorUI:
             return
         text = self.standard_controller.handle_button(label)
         self.update_display(text)
+        self._record_history_from(self.standard_controller)
 
     def handle_key(self, event) -> None:
         key = event.keysym
@@ -254,6 +293,7 @@ class CalculatorUI:
         text = self.standard_controller.handle_key(key, char)
         if text is not None:
             self.update_display(text)
+            self._record_history_from(self.standard_controller)
 
     def set_mode(self, mode: str) -> None:
         if mode not in {"Standard", "Programmer", "Date"}:
@@ -281,12 +321,14 @@ class CalculatorUI:
         self._sync_programmer_state()
         self._refresh_mode_controls()
         self.update_display(text)
+        self._record_history_from(self.programmer_controller)
 
     def calculate_date_difference(self) -> None:
         text = self.date_controller.calculate_difference(
             self.date_start_var.get(), self.date_end_var.get()
         )
         self.update_display(text)
+        self._record_history_from(self.date_controller)
 
     def calculate_date_duration(self) -> None:
         text = self.date_controller.calculate_duration(
@@ -298,6 +340,30 @@ class CalculatorUI:
             days=self.date_days_var.get(),
         )
         self.update_display(text)
+        self._record_history_from(self.date_controller)
+
+    def clear_history(self) -> None:
+        self.history_store.clear()
+        self._refresh_history_display()
+
+    def _record_history_from(self, controller) -> None:
+        if not hasattr(controller, "pop_history_entry"):
+            return
+        entry = controller.pop_history_entry()
+        if entry is None:
+            return
+        self.history_store.add(entry)
+        self._refresh_history_display()
+
+    def _refresh_history_display(self) -> None:
+        if not hasattr(self, "history_text"):
+            return
+        text = "\n".join(self.history_store.formatted_lines())
+        self.history_text.configure(state="normal")
+        self.history_text.delete("1.0", "end")
+        if text:
+            self.history_text.insert("end", text)
+        self.history_text.configure(state="disabled")
 
     def update_display(self, text: str) -> None:
         self.display_var.set(text)
@@ -315,6 +381,7 @@ class CalculatorUI:
             text = self.programmer_controller.handle_button(label)
             self._sync_programmer_state()
             self.update_display(text)
+            self._record_history_from(self.programmer_controller)
             return
         if label in BaseConverter.BASES:
             self.set_base(label)
@@ -337,6 +404,7 @@ class CalculatorUI:
             if text is not None:
                 self._sync_programmer_state()
                 self.update_display(text)
+                self._record_history_from(self.programmer_controller)
             return
         if char:
             upper = char.upper()

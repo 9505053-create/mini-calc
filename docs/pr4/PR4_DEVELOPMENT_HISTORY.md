@@ -147,3 +147,23 @@ GREEN:
   - `python3 -m pytest -q` -> `112 passed`.
   - `python3 -m py_compile source/mode_controllers.py tests/test_mode_controllers.py` -> clean.
   - `git diff --check` -> clean.
+
+
+## 2026-05-15 — PR-04 Task 5 Tkinter History UI integration
+
+RED:
+
+- Added fake-widget UI tests for Standard history append + clear, Date difference history append, and Programmer base-switch history append.
+- Verified RED: `test_standard_ui_records_completed_calculation_history_and_clear_history` failed with `AttributeError: type object 'CalculatorUI' has no attribute '_refresh_history_display'`.
+
+GREEN:
+
+- Added `HistoryStore` ownership to `CalculatorUI`.
+- Added scrollable Tk `Text`-based history panel with `Clear History` button.
+- Added `_record_history_from()`, `_refresh_history_display()`, and `clear_history()`.
+- Integrated history drains after Standard button/key, Date calculations, and Programmer base changes/button/key paths.
+- Verification:
+  - `python3 -m pytest tests/test_programmer_ui.py -q` -> `9 passed`.
+  - `python3 -m pytest -q` -> `115 passed`.
+  - `python3 -m py_compile calculator.py tests/test_programmer_ui.py` -> clean.
+  - `git diff --check` -> clean.

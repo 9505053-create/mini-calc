@@ -7,6 +7,7 @@ from types import MethodType, SimpleNamespace
 from calculator import CalculatorUI
 from source.base_converter import BaseConverter
 from source.calculator_engine import CalculatorEngine
+from source.history_store import HistoryStore
 from source.memory_store import MemoryStore
 from source.mode_controllers import DateModeController, ProgrammerModeController, StandardModeController
 
@@ -17,6 +18,22 @@ class FakeDisplayVar:
 
     def set(self, value: str) -> None:
         self.value = value
+
+
+
+class FakeHistoryText:
+    def __init__(self) -> None:
+        self.content = ""
+        self.options = {}
+
+    def configure(self, **kwargs) -> None:
+        self.options.update(kwargs)
+
+    def delete(self, start, end) -> None:
+        self.content = ""
+
+    def insert(self, index, text: str) -> None:
+        self.content += text
 
 
 class FakeButton:
@@ -49,6 +66,11 @@ def make_programmer_ui() -> SimpleNamespace:
     ui.current_base = "HEX"
     ui.programmer_value = "0"
     ui.display_var = FakeDisplayVar()
+    ui.history_store = HistoryStore()
+    ui.history_text = FakeHistoryText()
+    ui._refresh_history_display = MethodType(CalculatorUI._refresh_history_display, ui)
+    ui._record_history_from = MethodType(CalculatorUI._record_history_from, ui)
+    ui.clear_history = MethodType(CalculatorUI.clear_history, ui)
     ui.mode_buttons = {label: FakeButton(label) for label in ("Standard", "Programmer")}
     ui.base_buttons = {label: FakeButton(label) for label in BaseConverter.BASES}
     ui.buttons = {label: FakeButton(label) for label in ("AC", "+/-", "%", "÷", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "=", "+", "-", "×")}
@@ -106,7 +128,12 @@ def make_standard_ui() -> SimpleNamespace:
     ui.mode = "Standard"
     ui.display_var = FakeDisplayVar()
     ui.memory_indicator_var = FakeDisplayVar()
+    ui.history_store = HistoryStore()
+    ui.history_text = FakeHistoryText()
     ui.update_display = MethodType(CalculatorUI.update_display, ui)
+    ui._refresh_history_display = MethodType(CalculatorUI._refresh_history_display, ui)
+    ui._record_history_from = MethodType(CalculatorUI._record_history_from, ui)
+    ui.clear_history = MethodType(CalculatorUI.clear_history, ui)
     ui.handle_button = MethodType(CalculatorUI.handle_button, ui)
     return ui
 
@@ -118,6 +145,11 @@ def make_date_ui() -> SimpleNamespace:
     ui.display_var = FakeDisplayVar()
     ui.memory = MemoryStore()
     ui.memory_indicator_var = FakeDisplayVar()
+    ui.history_store = HistoryStore()
+    ui.history_text = FakeHistoryText()
+    ui._refresh_history_display = MethodType(CalculatorUI._refresh_history_display, ui)
+    ui._record_history_from = MethodType(CalculatorUI._record_history_from, ui)
+    ui.clear_history = MethodType(CalculatorUI.clear_history, ui)
     ui.date_start_var = SimpleNamespace(get=lambda: "2026-05-15")
     ui.date_end_var = SimpleNamespace(get=lambda: "2026-05-17")
     ui.date_base_var = SimpleNamespace(get=lambda: "2024-01-31")
@@ -163,3 +195,41 @@ def test_date_ui_calculate_duration_updates_display():
     ui.calculate_date_duration()
 
     assert ui.display_var.value == "2025-03-05"
+
+
+
+def test_standard_ui_records_completed_calculation_history_and_clear_history():
+    ui = make_standard_ui()
+
+    ui.handle_button("2")
+    ui.handle_button("+")
+    ui.handle_button("3")
+    ui.handle_button("=")
+
+    assert ui.history_text.content == "[Standard] 2 + 3 = 5"
+    assert len(ui.history_store.entries()) == 1
+
+    ui.clear_history()
+
+    assert ui.history_store.entries() == ()
+    assert ui.history_text.content == ""
+
+
+def test_date_ui_records_history_after_successful_difference():
+    ui = make_date_ui()
+
+    ui.calculate_date_difference()
+
+    assert ui.history_text.content == "[Date] 2026-05-15 → 2026-05-17 = 2 days"
+
+
+def test_programmer_ui_records_base_switch_history():
+    ui = make_programmer_ui()
+    ui.current_base = "DEC"
+    ui.programmer_controller.current_base = "DEC"
+    ui.programmer_value = "255"
+    ui.programmer_controller.programmer_value = "255"
+
+    ui.set_base("HEX")
+
+    assert ui.history_text.content == "[Programmer] DEC 255 → HEX = FF"
