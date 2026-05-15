@@ -1,5 +1,40 @@
 # MiniCalc v1.0 Release Notes
 
+## PR-04 Calculation History / Session Tape
+
+### Summary
+
+PR-04 adds an in-memory, session-only Calculation History panel so users can inspect recent Standard, Date, and Programmer operations without adding persistence or export complexity.
+
+### Features
+
+- Added `HistoryStore` and immutable `HistoryEntry` snapshots.
+- Added Standard Mode history for explicit `=` / keyboard Enter completions.
+- Added controlled Standard error history, e.g. divide-by-zero as `5 ÷ 0 = Error` with error status.
+- Added Date Mode history for successful date difference and date +/- duration calculations.
+- Added Programmer Mode history for successful base-switch conversions, with normalized input values.
+- Added a scrollable Tkinter History panel and `Clear History` button.
+
+### Quality
+
+- Kept history storage headless and session-only; no filesystem persistence.
+- Preserved existing display-string controller APIs by adding narrow `pop_history_entry()` seams.
+- Added HistoryStore unit tests, controller history tests, and fake-widget UI coordination tests.
+- Deferred Standard immediate-execution chaining history to PR-05+ to avoid broadening engine APIs prematurely.
+
+### Verification
+
+- `python3 -m pytest -q` → 115 passed.
+- `python3 -m py_compile calculator.py source/*.py tests/*.py` → clean.
+- `git diff --check` → clean.
+
+### Known Limits
+
+- History is not persisted across app restarts.
+- History cannot yet be exported, searched, copied, or clicked to restore inputs.
+- Standard Mode chaining such as `1 + 2 +` updates the display but does not create a PR-04 history entry.
+- Manual visible Tkinter smoke remains recommended before merge.
+
 ## PR-03 Date Calculator, Memory Keys, and Mode Controllers
 
 ### Summary

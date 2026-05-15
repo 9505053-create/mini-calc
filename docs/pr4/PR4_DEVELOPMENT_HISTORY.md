@@ -167,3 +167,31 @@ GREEN:
   - `python3 -m pytest -q` -> `115 passed`.
   - `python3 -m py_compile calculator.py tests/test_programmer_ui.py` -> clean.
   - `git diff --check` -> clean.
+
+
+## 2026-05-15 — PR-04 documentation and local final gate
+
+Documentation updates:
+
+- Updated `README.md` with PR-04 Calculation History behavior and session-only limitation.
+- Updated `docs/release_notes.md` with PR-04 release notes.
+- Updated `docs/pr4/ACCEPTANCE_CRITERIA.md` status to implementation complete locally pending review/smoke.
+
+Final local gate:
+
+```bash
+python3 -m pytest -q && \
+python3 -m py_compile calculator.py source/calculator_engine.py source/base_converter.py source/memory_store.py source/date_calculator.py source/mode_controllers.py source/history_store.py tests/conftest.py tests/test_calculator.py tests/test_base_converter.py tests/test_programmer_ui.py tests/test_memory_store.py tests/test_date_calculator.py tests/test_mode_controllers.py tests/test_history_store.py && \
+git diff --check
+```
+
+Result:
+
+- `115 passed in 0.61s`.
+- `py_compile` clean.
+- `git diff --check` clean.
+
+Remaining caveat before merge decision:
+
+- Manual visible Tkinter GUI smoke should still be performed using `docs/pr4/PR4_SMOKE_CHECKLIST.md`.
+- 3AI implementation review should still run before any merge decision.

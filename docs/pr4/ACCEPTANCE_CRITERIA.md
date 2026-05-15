@@ -2,7 +2,7 @@
 
 Date: 2026-05-15
 Branch: `pr4-planning`
-Status: Planning draft for 3AI review
+Status: Implementation complete locally; pending final 3AI implementation review and manual GUI smoke
 
 ## Release gate
 
