@@ -96,6 +96,45 @@ a6bcbe0 fix: harden programmer mode before PR3
 origin https://github.com/9505053-create/mini-calc.git
 ```
 
+
+### 2026-05-15 12:28 — Phase 1 MemoryStore headless core
+
+TDD RED:
+
+```bash
+python3 -m pytest tests/test_memory_store.py -q
+```
+
+Expected failure observed:
+
+```text
+ModuleNotFoundError: No module named 'source.memory_store'
+```
+
+GREEN implementation:
+
+- Created `source/memory_store.py`.
+- Created `tests/test_memory_store.py`.
+- Implemented `MemoryStore` with `recall`, `store`, `add`, `subtract`, `clear`, and non-zero `has_value` indicator semantics.
+
+Verification:
+
+```bash
+python3 -m pytest tests/test_memory_store.py -q
+python3 -m pytest -q
+python3 -m py_compile source/memory_store.py tests/test_memory_store.py
+git diff --check
+```
+
+Result:
+
+```text
+6 passed in 0.15s
+52 passed in 0.37s
+py_compile clean
+git diff --check clean
+```
+
 ## Commit Log
 
 _To be updated as PR-03 progresses._
