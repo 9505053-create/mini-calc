@@ -367,7 +367,7 @@ Files:
 
 - Create: `source/calculator_engine.py`
 - Modify: `calculator.py`
-- Create: `tests/test_calculator_engine.py` only if extra tests are useful; existing `tests/test_calculator.py` must keep importing `CalculatorEngine` from `calculator.py`.
+- Keep `tests/test_calculator.py` as the compatibility/engine regression suite; create a separate engine test file only if future coverage becomes large enough to justify it.
 
 Steps:
 
@@ -391,7 +391,7 @@ Objective: Provide a tested public method for `MR` without direct controller mut
 Files:
 
 - Modify: `source/calculator_engine.py`
-- Test: `tests/test_calculator.py` or `tests/test_calculator_engine.py`
+- Test: `tests/test_calculator.py`
 
 Required behavior for `replace_current_input(text: str) -> str`:
 
@@ -716,7 +716,7 @@ Run:
 
 ```bash
 python3 -m pytest -q && \
-python3 -m py_compile calculator.py source/calculator_engine.py source/base_converter.py source/memory_store.py source/date_calculator.py source/mode_controllers.py tests/conftest.py tests/test_calculator.py tests/test_calculator_engine.py tests/test_base_converter.py tests/test_programmer_ui.py tests/test_memory_store.py tests/test_date_calculator.py tests/test_mode_controllers.py && \
+python3 -m py_compile calculator.py source/calculator_engine.py source/base_converter.py source/memory_store.py source/date_calculator.py source/mode_controllers.py tests/conftest.py tests/test_calculator.py tests/test_base_converter.py tests/test_programmer_ui.py tests/test_memory_store.py tests/test_date_calculator.py tests/test_mode_controllers.py && \
 git diff --check
 ```
 

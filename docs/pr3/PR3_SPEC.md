@@ -191,7 +191,7 @@ Create:
 - `source/mode_controllers.py`
 - `tests/test_memory_store.py`
 - `tests/test_date_calculator.py`
-- `tests/test_calculator_engine.py`
+- `tests/test_calculator.py` (covers `CalculatorEngine`, including compatibility import from `calculator.py`)
 - `tests/test_mode_controllers.py`
 - `docs/pr3/PR3_SPEC.md`
 - `docs/pr3/IMPLEMENTATION_PLAN.md`
@@ -216,7 +216,7 @@ Minimum automated gate:
 
 ```bash
 python3 -m pytest -q
-python3 -m py_compile calculator.py source/calculator_engine.py source/base_converter.py source/memory_store.py source/date_calculator.py source/mode_controllers.py tests/conftest.py tests/test_calculator.py tests/test_calculator_engine.py tests/test_base_converter.py tests/test_programmer_ui.py tests/test_memory_store.py tests/test_date_calculator.py tests/test_mode_controllers.py
+python3 -m py_compile calculator.py source/calculator_engine.py source/base_converter.py source/memory_store.py source/date_calculator.py source/mode_controllers.py tests/conftest.py tests/test_calculator.py tests/test_base_converter.py tests/test_programmer_ui.py tests/test_memory_store.py tests/test_date_calculator.py tests/test_mode_controllers.py
 git diff --check
 ```
 

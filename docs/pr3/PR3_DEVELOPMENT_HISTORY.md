@@ -341,6 +341,32 @@ Current release caveat:
 - Manual GUI smoke checklist has been authored but not yet executed in a visible Windows/Tkinter GUI session.
 - Final 3AI implementation review is pending.
 
+
+### 2026-05-15 13:01 — 3AI implementation review hygiene fix
+
+Codex implementation review initially returned `BLOCKED`, but the blocker was about review-package hygiene rather than functional PR3 source code:
+
+- The first review package omitted `tests/conftest.py` even though verification docs referenced it.
+- The Codex package-local rerun encountered `pytest-cache-files-*` artifacts inside the copied review tree.
+- Codex explicitly noted that inspected source-level PR3 changes did not reveal a functional blocker.
+
+Fixes applied:
+
+- Verified the actual repo remains clean:
+  - `python3 -m pytest -q` -> `94 passed`.
+  - documented `py_compile` command including `tests/conftest.py` -> clean.
+  - `git diff --check` -> clean.
+- Regenerated a hygiene re-review package from `git ls-files` only so untracked cache artifacts cannot be included.
+- Confirmed `tests/conftest.py` exists in the actual repo and in the regenerated package.
+- Verified the regenerated package's `package/files` snapshot can run `python3 -m pytest -q` -> `94 passed`.
+- Removed stale documentation references to non-existent `tests/test_calculator_engine.py`; engine coverage remains in `tests/test_calculator.py`.
+
+3AI follow-up:
+
+- Gemini hygiene confirmation: `PASS`.
+- Codex hygiene re-review: `PASS_WITH_WARNINGS`; previous blocker resolved.
+- Remaining warning: manual visible Tkinter GUI smoke is still documented but not yet executed.
+
 ## Commit Log
 
 _To be updated as PR-03 progresses._
