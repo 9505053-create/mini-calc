@@ -273,6 +273,45 @@ py_compile clean
 git diff --check clean
 ```
 
+
+### 2026-05-15 12:50 — Phase 4 Tkinter UI integration
+
+Implemented UI integration:
+
+- `calculator.py` now delegates Standard, Programmer, and Date behavior to headless controllers.
+- Added Standard Mode memory buttons: `MC`, `MR`, `MS`, `M+`, `M-`.
+- Added memory indicator `M` when memory contains a non-zero value.
+- Added Date Mode tab and date widgets for:
+  - date difference
+  - date +/- years/months/weeks/days
+- Preserved PR-02.1 Programmer Mode behavior through `ProgrammerModeController`.
+
+UI regression tests:
+
+- Extended `tests/test_programmer_ui.py` with fake-object UI integration tests.
+- Caught and fixed controller/UI sync issues:
+  - private Programmer UI smoke tests needed `_sync_programmer_state` binding.
+  - `_refresh_mode_controls()` now syncs controller `current_base` from UI state before deriving button states.
+  - `_handle_programmer_button()` now syncs controller state from UI fields before handling legacy/private UI calls.
+
+Verification:
+
+```bash
+python3 -m pytest tests/test_programmer_ui.py -q
+python3 -m pytest -q
+python3 -m py_compile calculator.py source/*.py tests/*.py
+git diff --check
+```
+
+Result:
+
+```text
+6 passed in 0.23s
+94 passed in 0.52s
+py_compile clean
+git diff --check clean
+```
+
 ## Commit Log
 
 _To be updated as PR-03 progresses._
