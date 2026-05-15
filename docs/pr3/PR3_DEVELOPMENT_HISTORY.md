@@ -135,6 +135,45 @@ py_compile clean
 git diff --check clean
 ```
 
+
+### 2026-05-15 12:31 — Phase 2 DateCalculator headless core
+
+TDD RED:
+
+```bash
+python3 -m pytest tests/test_date_calculator.py -q
+```
+
+Expected failure observed:
+
+```text
+ModuleNotFoundError: No module named 'source.date_calculator'
+```
+
+GREEN implementation:
+
+- Created `source/date_calculator.py`.
+- Created `tests/test_date_calculator.py`.
+- Implemented ISO date parsing, day difference, add/subtract duration, year/month clamp, invalid duration validation, multi-component ordering, and >12-month rollover handling.
+
+Verification:
+
+```bash
+python3 -m pytest tests/test_date_calculator.py -q
+python3 -m pytest -q
+python3 -m py_compile source/date_calculator.py tests/test_date_calculator.py
+git diff --check
+```
+
+Result:
+
+```text
+20 passed in 0.19s
+72 passed in 0.44s
+py_compile clean
+git diff --check clean
+```
+
 ## Commit Log
 
 _To be updated as PR-03 progresses._
