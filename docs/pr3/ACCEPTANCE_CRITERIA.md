@@ -2,7 +2,7 @@
 
 Date: 2026-05-15
 Scope: Date Calculator, Standard Mode Memory Keys, minimum mode-controller architecture
-Status: Planning draft for 3AI review
+Status: Implementation complete locally; pending final 3AI implementation review
 
 ## 1. Release Gate Summary
 
@@ -168,7 +168,7 @@ Before PR-03 is considered ready for final 3AI implementation review, run:
 
 ```bash
 python3 -m pytest -q && \
-python3 -m py_compile calculator.py source/calculator_engine.py source/base_converter.py source/memory_store.py source/date_calculator.py source/mode_controllers.py tests/conftest.py tests/test_calculator.py tests/test_calculator_engine.py tests/test_base_converter.py tests/test_programmer_ui.py tests/test_memory_store.py tests/test_date_calculator.py tests/test_mode_controllers.py && \
+python3 -m py_compile calculator.py source/calculator_engine.py source/base_converter.py source/memory_store.py source/date_calculator.py source/mode_controllers.py tests/conftest.py tests/test_calculator.py tests/test_base_converter.py tests/test_programmer_ui.py tests/test_memory_store.py tests/test_date_calculator.py tests/test_mode_controllers.py && \
 git diff --check
 ```
 

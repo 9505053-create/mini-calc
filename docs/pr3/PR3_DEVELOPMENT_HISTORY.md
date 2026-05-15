@@ -312,6 +312,35 @@ py_compile clean
 git diff --check clean
 ```
 
+
+### 2026-05-15 12:55 — Phase 5 documentation and local release gate
+
+Documentation updates:
+
+- Updated `README.md` for PR-03 architecture, Date Mode, Memory Keys, and smoke checklist references.
+- Updated `docs/release_notes.md` with PR-03 summary, features, verification, and known limits.
+- Added `docs/pr3/PR3_SMOKE_CHECKLIST.md` for manual GUI verification.
+- Updated `docs/pr3/ACCEPTANCE_CRITERIA.md` status and final verification command.
+
+Verification:
+
+```bash
+python3 -m pytest -q && python3 -m py_compile calculator.py source/calculator_engine.py source/base_converter.py source/memory_store.py source/date_calculator.py source/mode_controllers.py tests/conftest.py tests/test_calculator.py tests/test_base_converter.py tests/test_programmer_ui.py tests/test_memory_store.py tests/test_date_calculator.py tests/test_mode_controllers.py && git diff --check
+```
+
+Result:
+
+```text
+94 passed in 0.53s
+py_compile clean
+git diff --check clean
+```
+
+Current release caveat:
+
+- Manual GUI smoke checklist has been authored but not yet executed in a visible Windows/Tkinter GUI session.
+- Final 3AI implementation review is pending.
+
 ## Commit Log
 
 _To be updated as PR-03 progresses._

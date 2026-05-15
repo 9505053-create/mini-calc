@@ -1,5 +1,42 @@
 # MiniCalc v1.0 Release Notes
 
+## PR-03 Date Calculator, Memory Keys, and Mode Controllers
+
+### Summary
+
+PR-03 adds a Date Calculator mode, Standard Mode memory keys, and a minimum mode-controller architecture refactor so the app can support three modes without concentrating all behavior inside `CalculatorUI`.
+
+### Features
+
+- Added Date Mode with two workflows:
+  - day difference: `end_date - start_date`
+  - date add/subtract duration: years, months, weeks, days
+- Added deterministic month-end and leap-year clamping for date arithmetic.
+- Added Standard Mode memory keys: `MC`, `MR`, `MS`, `M+`, `M-`.
+- Added an `M` memory indicator when memory contains a non-zero value.
+- Added headless controllers for Standard, Programmer, and Date modes.
+- Moved `CalculatorEngine` to `source/calculator_engine.py` while keeping `calculator.py` as the Tkinter UI entrypoint.
+
+### Quality
+
+- Added `MemoryStore`, `DateCalculator`, and mode-controller unit tests.
+- Extended lightweight UI coordination tests without launching Tkinter.
+- Preserved PR-02.1 Programmer Mode behavior, including HEX digit `C` vs `AC` clear and 64-bit unsigned input cap.
+- Added `docs/pr3/PR3_DEVELOPMENT_HISTORY.md` and `docs/pr3/PR3_SMOKE_CHECKLIST.md` for traceability.
+
+### Verification
+
+- `python3 -m pytest -q` → 94 passed.
+- `python3 -m py_compile calculator.py source/*.py tests/*.py` → clean.
+- `git diff --check` → clean.
+
+### Known Limits
+
+- Date Mode accepts ISO `YYYY-MM-DD` dates only.
+- No timezone, time-of-day, or business-day support.
+- Memory is session-only and Standard Mode only.
+- Programmer Mode remains non-negative 64-bit unsigned integer conversion only.
+
 ## PR-02.1 Programmer Mode Hardening
 
 ### Summary
